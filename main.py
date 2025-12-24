@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit,
     QVBoxLayout, QPushButton, QComboBox
 )
+import matplotlib.pyplot as plt
+
 
 class AmortizationApp(QWidget):
     def __init__(self):
@@ -12,7 +14,7 @@ class AmortizationApp(QWidget):
 
     def initUI(self):
         self.setWindowTitle("Расчет годовой амортизации")
-        self.setGeometry(100, 100, 500, 400)
+        self.setGeometry(100, 100, 500, 450)
 
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
@@ -46,16 +48,29 @@ class AmortizationApp(QWidget):
         self.layout.addWidget(self.lineedit_cost)
 
         # Кнопка расчета
-        self.button = QPushButton("Рассчитать амортизацию")
-        self.button.clicked.connect(self.calculate)
-        self.layout.addWidget(self.button)
+        self.button_calc = QPushButton("Рассчитать амортизацию")
+        self.button_calc.clicked.connect(self.calculate)
+        self.layout.addWidget(self.button_calc)
 
-        # Результат
-        self.label4 = QLabel("Годовая амортизация, тыс. руб.")
+        # Фактическая амортизация
+        self.label4 = QLabel("Фактическая амортизация, тыс. руб.")
         self.layout.addWidget(self.label4)
 
         self.lineedit_result = QLineEdit(self)
+        self.lineedit_result.setReadOnly(True)
         self.layout.addWidget(self.lineedit_result)
+
+        # Плановая амортизация (НОВОЕ)
+        self.label5 = QLabel("Плановая амортизация, тыс. руб.")
+        self.layout.addWidget(self.label5)
+
+        self.lineedit_plan = QLineEdit(self)
+        self.layout.addWidget(self.lineedit_plan)
+
+        # Кнопка гистограммы
+        self.button_chart = QPushButton("Амортизация (гистограмма)")
+        self.button_chart.clicked.connect(self.show_chart)
+        self.layout.addWidget(self.button_chart)
 
         # Установка начального срока
         self.update_life_time()
@@ -78,9 +93,27 @@ class AmortizationApp(QWidget):
         except ValueError:
             self.lineedit_result.setText("Ошибка ввода")
 
+    def show_chart(self):
+        try:
+            fact = float(self.lineedit_result.text())
+            plan = float(self.lineedit_plan.text())
+
+            values = [fact, plan]
+            labels = ["Фактическая", "Плановая"]
+
+            plt.figure(figsize=(6, 4))
+            plt.bar(labels, values)
+            plt.title("Сравнение годовой амортизации")
+            plt.ylabel("тыс. руб.")
+            plt.grid(axis="y")
+            plt.show()
+
+        except ValueError:
+            pass
+
+
 # Запуск приложения
 app = QApplication(sys.argv)
 window = AmortizationApp()
 window.show()
 sys.exit(app.exec_())
-
